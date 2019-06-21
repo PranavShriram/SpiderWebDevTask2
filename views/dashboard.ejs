@@ -1,0 +1,361 @@
+<html>
+    <head>
+       <link rel="stylesheet" href="/css/dashboard.css">
+    </head>
+    <body>
+
+            <div id='cssmenu'>
+                    <ul>
+                       <li class='active align-left'><a href='#'>RightSplit</a></li>
+                     <li class = "align-right">
+                        <form method = "POST" action = "/logout">
+                                <button> Logout</button>
+                         </form>
+                    </li> 
+                       <li class = "align-right active"><a href='#'>Hey <%= user.username%></a></li>
+                    </ul>
+           </div>
+                           
+        <div class = "flash-message">
+            <%= message %>
+        </div>
+<div class = "container">  
+
+            <div class = "sidebar">
+                    <div class = "sidebar__options-list">
+                            <form action = "/dashboard/main" method = "GET">
+                                <%  if(option == "main") { %>
+                                   <button class = "sidebar__options-list__choice chosenOption"><img src = "/images/dashboard.svg" width = "20" height = "20"><span class = "text">Dashboard</span></button>
+                                <% }else{ %>
+                                   <button class = "sidebar__options-list__choice "><img src = "/images/dashboard.svg" width = "20" height = "20"><span class = "text">Dashboard</span></button>
+                                <%  } %>
+                            </form>  
+                        <form action = "/dashboard/allExpenses" method = "GET">
+                         <%  if(option == "allExpenses") { %>
+                            <button class = "sidebar__options-list__choice chosenOption"><img src = "/images/menu.svg" width = "20" height = "20"><span class = "text">All expenses</span></button>
+                         <% }else{ %>
+                            <button class = "sidebar__options-list__choice "><img src = "/images/menu.svg" width = "20" height = "20"><span class = "text">All expenses</span></button>
+                         <%  } %>
+                        </form>  
+                        <form method = "POST" action = "/newFriendRequest">
+                            <input type = "text" name = "username" placeholder="username">
+                            <button>Send Request</button>
+                        </form>
+                        <div class = "sidebar__options-list__choice"><img src = "/images/friends.svg" width = "20" height = "20"><span class = "text">Friends</span></div>
+
+                       <% user.friends.forEach((friend) => { %>
+                        <form action = "/dashboard/<%= friend.username %>" method = "GET">
+                        <%  if(option == friend.username) { %>
+                            <button class = "sidebar__options-list__choice chosenOption"><img src = "/images/friends.svg" width = "20" height = "20"><span class = "text"><%= friend.username %></span></button>
+                         <% }else{ %>
+                            <button class = "sidebar__options-list__choice "><img src = "/images/friends.svg" width = "20" height = "20"><span class = "text"><%= friend.username %></span></button>
+                         <%  } %>
+                        </form>
+                       <%   }); %>
+                       <% if(user.friends.length == 0){ %>
+                        <div style = "color:grey"> No friends added yet</div> 
+                    <% } %>
+                    </div>
+                                              
+                            <div class = "requests-bar">
+                                    <div class = "sidebar__options-list__choice"><img src = "/images/network.svg" width = "20" height = "20"><span class = "text">Friend Requests</span></div>
+
+                                 <% user.friendRequestsRecieved.forEach((friendRequest) =>{ %> 
+                                       
+                                            
+                                        
+                                        <form  method = "POST" action = "/acceptFriendRequest/<%= friendRequest %>">
+                                            <%= friendRequest %><button class = "requests-bar__button"><img src = "/images/add.svg" width = "20" height = "20"></button>
+                                        </form>
+                                 <% }); %>
+                                 <% if(user.friendRequestsRecieved.length == 0){ %>
+                                     <div style = "color:grey"> No friend requests to show</div> 
+                                 <% } %>
+                            </div>
+                              
+                           
+           </div>     
+            
+
+   <% if(option != "main") { %>             
+  <div class = "all-expenses">
+    
+        <div class = "all-expenses__sort">
+                <form method = "POST" action = "/sort/Date/<%= option %>">
+                  <input type = "hidden" name = "sortMethod" value = "Date">
+                  <button>Sort by Date</button>
+                </form>
+                <form method = "POST" action = "/sort/Amount/<%= option %>">
+                  <input type = "hidden" name = "sortMethod" value = "Amount">
+                  <button>Sort by Amount</button>
+                </form>
+          </div> 
+      
+       
+    <div class = "all-expenses__rest">
+     <div class = "all-expenses__header"> 
+       <div class = "all-expenses__header__text"> 
+          <% if(option == "allExpenses") { %>
+            All Expenses
+        
+          <% } else { %>
+            <%= option %>
+          <% } %>  
+       </div>
+       <div>
+                <button class="all-expenses-getPostform__button">New Expense</button>
+       </div>
+       <div>
+       <% if(option != "allExpenses"){ %>
+         <form method = "POST" action = "/settle/<%= option %>">
+            <button class="all-expenses-getPostform__button">Settle</button>
+         </form>   
+       <% } %>    
+  
+       </div>
+    </div> 
+       
+        <div class = "all-expenses-details">
+               <% console.log(allExpenses) %>
+            <% allExpenses.forEach((allExpense) =>{ %> 
+                
+                <% var d = new Date(parseInt(allExpense.Date)) %>
+                <% console.log(d) %>
+              <% if(option == "allExpenses" || (option == allExpense.Split.User || option == allExpense.Payer)){ %>  
+               <div class = "row">
+                <div class = "all-expenses-details__date">
+                   <div class = "all-expenses-details__date__month"> <%= d.toString().slice(4,7) %></div> 
+                   <div class = "all-expenses-details__date__month"> <%= d.toString().slice(8,10) %></div> 
+                </div>
+                <div class = "all-expenses-details__reason"><%= allExpense.Reason %></div>
+                <div class = "all-expenses-details__cost">
+                    
+                        <% if(user.username == allExpense.Payer){ %>
+                            <div class = "all-expenses-details__cost__text">
+                                you paid
+                            </div> 
+                            <%  }else{ %>
+                             <div class = "all-expenses-details__cost__text">
+                                   <%=  allExpense.Payer %> paid
+                             </div>  
+                       <% } %>
+                   <div class = "all-expenses-details__cost__amount">
+                       Rs <%= allExpense.Amount %>
+                    </div>
+                </div>  
+                <% if(allExpense.Split.User != "" && user.username == allExpense.Payer){ %>
+                    <div class = "all-expenses-details__split">
+                        <div class = "all-expenses-details__split__user">
+                            <%= allExpense.Split.User %> owes you 
+                        </div>
+                        <div class = "all-expenses-details__split__amount">
+                              Rs  <%= allExpense.Split.AmountSplit %> 
+                        </div>
+                    </div>
+                <% } else if(allExpense.Split.User != "" && user.username != allExpense.Payer){ %>
+                    <div class = "all-expenses-details__split">
+                            <div class = "all-expenses-details__split__user">
+                              You owe <%= allExpense.Payer %> 
+                            </div>
+                            <div class = "all-expenses-details__split__amount">
+                                  Rs  <%= allExpense.Split.AmountSplit %> 
+                            </div>
+                    </div>                      
+
+                 <% } else { %> 
+                    <div class = "all-expenses-details__split">
+                            <div class = "all-expenses-details__split__user">
+                                 You borrowed nothing
+                            </div> 
+                    </div>
+                 <%   } %>
+              
+                <form method = "POST" action = "/dashboard/allExpenses/<%= allExpense._id %>?_method=DELETE">
+                    <div class = "all-expenses-details__element"><button class = "all-expenses__element__button"><img src = "/images/deleteNew.svg" width = "25" height = 25></button></div> 
+                </form>
+                  
+               </div> 
+               <div class = "all-expenses-description">
+                       <img src = "/images/invoice.svg" width = "80" height = "80">
+                       <div class = "all-expenses-description__body">
+                           <div class = "all-expenses-description__body__reason"><%= allExpense.Reason %></div>
+                           <div class = "all-expenses-description__body__description"><%= allExpense.Description %></div>
+                           <div class = "all-expenses-description__body__expense">Rs <%= allExpense.Amount %></div>
+                           <div class = "all-expenses-description__body__expense">Added by <%= allExpense.Payer %> on <%= d.toString().slice(4,7) %> <%= d.toString().slice(8,10) %> </div>
+                           <form method = "GET" action = "/dashboard/allExpenses/<%= allExpense._id %>/edit/<%= option %>">
+                             <div ><button class = "all-expenses-update__form__description__submitButton">Update</button></div> 
+                          </form> 
+                       </div>
+                </div> 
+               <% } %>
+            <% })%>
+                      
+        </div>  
+     
+         
+                <!-- <div class = "dashboard-details">
+                   
+                    
+                </div> -->
+         
+         </div>
+       </div>
+    <% } else{ %>
+
+       <div class = "dashboard-main">
+           <div class = "dashboard-main__header">
+              Dashboard
+           </div>
+           <div class = "dashboard-main__body">
+               <div class = "owe">
+                   <div class = "owe_text">YOU OWE  </div>
+                   <% user.friends.forEach((friend) => { %>
+                    <% if(friend.amountBalance < 0){ %>
+                   <div class = "dashboard-segment">
+                      <div class = "owe__main"><%= friend.username %></div>
+                      <div class = "owe__main2"> is owed Rs <%= Math.abs(friend.amountBalance) %> by you  </div>
+                   </div>  
+                    <% } %>
+                   <% }) %>
+                
+               </div>
+               <div class = "owed">
+                    <div class = "owe_text">YOU ARE OWED </div>
+                    <% user.friends.forEach((friend) => { %>
+                         <% if(friend.amountBalance > 0){ %>
+                           <div class = "dashboard-segment"> 
+                            <div class = "owed__main"><%= friend.username %></div>
+                            <div class = "owed__main2"> owes you <%= friend.amountBalance %>  </div>
+                           </div>
+                         <% } %>
+                    <% }) %>
+                   
+               </div>
+            </div>
+               
+
+            <% settlementLog.forEach(settlement => { %>
+
+             <% var d = new Date(parseInt(settlement.Date)) %>
+               <div class = "settlement">
+                    <div class = "settlement__date">
+                       <div class = "settlement__date__month"> <%= d.toString().slice(4,7) %></div> 
+                       <div class = "settlement-details__date__month"> <%= d.toString().slice(8,10) %></div> 
+                    </div>
+                    <div class = "settlement__body"><%= settlement.Payer %> and <%= settlement.Payee %> settled all expenses worth <%= Math.abs(settlement.AmountSettled) %></div>
+                </div> 
+            <% }) %>     
+         
+        </div>
+  <%  } %>
+      <% if(option != "main") { %>  
+       <div class = "container__right">
+         
+         <% if(option == "allExpenses"){ %>
+                <div class = "container__right__balance">
+                  <%  if(user.totalAmountBalance > 0){ %>
+                        
+                        You are owed <%= user.totalAmountBalance %>
+                   <% } else{ %>
+
+                    <% if(Math.abs( user.totalAmountBalance) == 0){ %>
+                           All expenses settled
+                        <% }else{ %>
+                            You owe <%=  user.totalAmountBalance == 0?"nothing":Math.abs( user.totalAmountBalance) %>      
+                        <% } %>
+                   <% } %>  
+                </div>
+            <% } else { %>
+                  
+                  <% for(var i = 0;i < user.friends.length;i++){ %>
+                        
+                     <%  if(user.friends[i].username == option){ %>
+                        <%  if(user.friends[i].amountBalance > 0){ %>
+                        
+                            You are owed <%= user.friends[i].amountBalance %> by <%= user.friends[i].username %>
+                       <% } else if(user.friends[i].amountBalance < 0){ %>
+                          
+                             You owe <%= user.friends[i].username %> Rs <%= Math.abs(user.friends[i].amountBalance) %>      
+                       <% } else{ %>
+                            
+                          All expenses settled. Awesome!
+                     <% } break; } %>
+                  <% } %>
+            <% } %>
+
+       </div>
+       <%  } %>
+    
+ </div>
+
+  
+<form class = "all-expenses-post__form" method = "POST" action = "/dashboard/allExpenses" style = "display: none">
+     <div class = "all-expenses-post__form__header">Add an Expense</div>
+     <% if(option == "allExpenses") { %>
+        <div class = "all-expenses-post__form__split"> With you and: <input class = "all-expenses-post__form__splituser" type = "text" placeholder = "Enter username" name = "SplitUser"></div>
+
+     <%  }else{ %>
+        <div class = "all-expenses-post__form__split"> With you and: <input class = "all-expenses-post__form__splituser" type = "text" value = "<%= option %>" name = "SplitUser"></div>
+
+    <%  } %>
+     <hr class = "rule">
+     <div class = "all-expenses-post__form__main">
+         <img src = "/images/invoice.svg" height = "80" width = "80">
+       <div>  
+         <input class = "all-expenses-post__form__main__reason" type = "text" placeholder = "Expense Title" name = "Reason">
+         <input class = "all-expenses-post__form__main__reason" type = "text" placeholder = "Expense Description" name = "Description">
+         <input class = "all-expenses-post__form__main__amount" type = "number" placeholder = "Expense Amount" name = "Amount">
+       </div>
+    </div>  
+      <input class = "all-expenses-post__form__splitamount" type = "number" placeholder = "Split Amount" name = "SplitAmount">
+      <div class = "buttonSet">
+          <button class ="all-expenses-post__form__cancelButton" type = "button">Cancel</button>
+          <button class ="all-expenses-post__form__submitButton">Submit!</button>
+      </div>   
+</form>
+
+<% if(updateId != -1){ %>
+    <% for(var i = 0;i < allExpenses.length;i++){ %>   
+        
+            <% if( updateId == allExpenses[i]._id){ %> 
+               
+                  <div class = "all-expenses-update__form"> 
+                <form method="POST" action = "/dashboard/allExpenses/<%= updateId %>?_method=PUT">
+                        <div class = "all-expenses-update__form__header">Edit Expense</div>
+          
+                     <div class = "all-expenses-update__form__split"> With you and: <input class = "all-expenses-post__form__splituser" type = "text" placeholder = "Enter username" value = "<%= allExpenses[i].Split.User%>" name = "User"></div>
+        
+           
+                      <hr class = "rule">
+                    <div class = "all-expenses-update__form__main">
+                       <img src = "/images/invoice.svg" height = "80" width = "80">
+                      <div>  
+                         <input class = "all-expenses-update__form__main__reason" type = "text" placeholder = "Expense Reason" name = "Reason" value = "<%= allExpenses[i].Reason%>">
+                         <input class = "all-expenses-update__form__main__amount" type = "text" placeholder = "Expense Description" name = "Description" value = "<%= allExpenses[i].Description%>">
+                         <input class = "all-expenses-update__form__main__amount" type = "number" placeholder = "Expense Amount" name = "Amount" value = "<%= allExpenses[i].Amount%>">
+                      </div>
+                    </div>  
+                         <input class = "all-expenses-update__form__splitamount" type = "number" placeholder = "Split Amount" name = "AmountSplit" value = "<%= allExpenses[i].Split.AmountSplit%>">
+              <div style = "margin-left:52px" >
+                 
+                   <button class ="all-expenses-update__form__submitButton">Edit!</button>
+              </div>   
+            </form>
+                <div style = "margin-left:50px">  
+                  <form method = "GET" action = "/dashboard/<%= option %>">
+                    <button class ="all-expenses-update__form__cancelButton">Cancel</button>
+                  </form>
+                </div>    
+                 </div> 
+                
+                       <%   } %>
+              <%  } %>
+          <%  } %>
+   
+
+    
+  
+    <script src = "/js/dashboard_events.js"></script>
+    <script src = "/js/login.js"></script>
+    </body>
+</html>
