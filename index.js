@@ -428,7 +428,7 @@ app.put('/dashboard/allExpenses/:id',checkAuthenticity,(req,res) => {
     });
 
 });
-app.delete('/dashboard/allExpenses/:id',(req,res) => {
+app.delete('/dashboard/allExpenses/:id',checkAuthenticity,(req,res) => {
    Expense.findByIdAndRemove(req.params.id,(err,deletedExpense)=>{
       // console.log(deletedExpense);
 
@@ -456,18 +456,18 @@ app.delete('/dashboard/allExpenses/:id',(req,res) => {
 //=======================================
 //Settle request Routes
 //=======================================
-app.post("/settle/:option",(req,res) => {
+app.post("/settle/:option",checkAuthenticity,(req,res) => {
     settle(req.params.option,req.session.user,res);
 });
 //=======================================
 //Friend request Routes
 //=======================================
 
-app.post("/acceptFriendRequest/:user",(req,res) => {
+app.post("/acceptFriendRequest/:user",checkAuthenticity,(req,res) => {
       acceptFriendRequest(req.params.user,req.session.user,res);
 });
 
-app.post("/newFriendRequest",(req,res) => {
+app.post("/newFriendRequest",checkAuthenticity,(req,res) => {
     console.log(req.body.username);
 
 
